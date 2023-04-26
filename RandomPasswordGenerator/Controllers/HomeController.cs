@@ -6,27 +6,37 @@ namespace RandomPasswordGenerator.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private const string lowerCaseChars = "abcdefghijklmnopqrstuvwxyz";
+        private const string upperCaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        private const string numericChars = "0123456789";
+        private const string specialChars = "!@#$%^&*()_+";
 
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
-        public IActionResult Index()
+        public ActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        [HttpPost]
+        public ActionResult GeneratePassword(int passwordLength, bool includeLowerCase, bool includeUpperCase, bool includeNumeric, bool includeSpecialChars)
         {
-            return View();
-        }
+            var passwordChars = "";
+            if (includeLowerCase)
+                passwordChars += lowerCaseChars;
+            if (includeUpperCase)
+                passwordChars += upperCaseChars;
+            if (includeNumeric)
+                passwordChars += numericChars;
+            if (includeSpecialChars)
+                passwordChars += specialChars;
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var password = "";
+            var random = new Random();
+            for (int i = 0; i < passwordLength; i++)
+            {
+                password += passwordChars[random.Next(0, passwordChars.Length)];
+            }
+
+            return Json(new { password });
         }
     }
 }

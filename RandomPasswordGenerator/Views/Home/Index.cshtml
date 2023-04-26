@@ -1,8 +1,95 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewBag.Title = "Random Password Generator";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Random Password Generator</h2>
+
+<div class="form-group row">
+    <label for="password" class="col-sm-3 col-form-label">Password:</label>
+    <div class="col-sm-6">
+        <div class="input-group">
+            <input type="text" class="form-control" id="password" name="password" readonly>
+            <div class="input-group-append">
+                <button type="button" class="btn btn-secondary" id="copyPassword">Copy</button>
+            </div>
+        </div>
+    </div>
 </div>
+
+<div class="form-group row">
+    <label for="passwordLength" class="col-sm-3 col-form-label">Password Length:</label>
+    <div class="col-sm-6">
+        <input type="range" class="form-control-range" id="passwordLength" name="passwordLength" min="8" max="24" value="12">
+        <span id="passwordLengthValue"></span>
+    </div>
+</div>
+
+<div class="form-group row">
+    <label class="col-sm-3 col-form-label">Include:</label>
+    <div class="col-sm-6">
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="includeLowerCase" name="includeLowerCase" checked>
+            <label class="form-check-label" for="includeLowerCase">abcd</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="includeUpperCase" name="includeUpperCase" checked>
+            <label class="form-check-label" for="includeUpperCase">ABCD</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="includeNumeric" name="includeNumeric" checked>
+            <label class="form-check-label" for="includeNumeric">0123456789</label>
+        </div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="checkbox" id="includeSpecialChars" name="includeSpecialChars" checked>
+            <label class="form-check-label" for="includeSpecialChars">/*-?!'^+%&/()'</label>
+        </div>
+    </div>
+</div>
+
+<div class="form-group row">
+    <div class="col-sm-9 offset-sm-3">
+        <button type="button" class="btn btn-primary" id="generatePassword">Generate Password</button>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        $(function () {
+            var passwordLengthSlider = $("#passwordLength");
+            var passwordLengthValue = $("#passwordLengthValue");
+            passwordLengthValue.html(passwordLengthSlider.val());
+
+            passwordLengthSlider.on("input", function () {
+                passwordLengthValue.html(this.value);
+            });
+
+            $("#generatePassword").on("click", function () {
+                var passwordLength = passwordLengthSlider.val();
+                var includeLowerCase = $("#includeLowerCase").is(":checked");
+                var includeUpperCase = $("#includeUpperCase").is(":checked");
+                var includeNumeric = $("#includeNumeric").is(":checked");
+                var includeSpecialChars = $("#includeSpecialChars").is(":checked");
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("GeneratePassword", "Home")",
+                    data: {
+                        passwordLength: passwordLength,
+                        includeLowerCase: includeLowerCase,
+                        includeUpperCase: includeUpperCase,
+                        includeNumeric: includeNumeric,
+                        includeSpecialChars: includeSpecialChars
+                    },
+                    success: function (data) {
+                        $("#password").val(data.password);
+                    }
+                });
+            });
+
+            $("#copyPassword").on("click", function () {
+                $("#password").select();
+                document.execCommand("copy");
+            });
+        });
+    </script>
+}
